@@ -2,8 +2,10 @@
 #include <iostream>
 #include "json.hpp"
 #include <math.h>
-#include "FusionEKF.h"
-#include "tools.h"
+#include "sensor/MeasurementPackage.h"
+#include "sensor/SensorType.h"
+#include "filter/FusionEKF.h"
+#include "filter/Tools.h"
 
 using namespace std;
 
@@ -58,7 +60,7 @@ int main()
           
           string sensor_measurment = j[1]["sensor_measurement"];
           
-          MeasurementPackage meas_package;
+          MeasurementPackage<SensorType> meas_package;
           istringstream iss(sensor_measurment);
     	  long long timestamp;
 
@@ -67,28 +69,28 @@ int main()
     	  iss >> sensor_type;
 
     	  if (sensor_type.compare("L") == 0) {
-      	  		meas_package.sensor_type_ = MeasurementPackage::LASER;
-          		meas_package.raw_measurements_ = VectorXd(2);
+      	  		meas_package.sensor_type = SensorType::LASER;
+          		meas_package.measurements = VectorXd(2);
           		float px;
       	  		float py;
           		iss >> px;
           		iss >> py;
-          		meas_package.raw_measurements_ << px, py;
+          		meas_package.measurements << px, py;
           		iss >> timestamp;
-          		meas_package.timestamp_ = timestamp;
+          		meas_package.timestamp = timestamp;
           } else if (sensor_type.compare("R") == 0) {
 
-      	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
-          		meas_package.raw_measurements_ = VectorXd(3);
+      	  		meas_package.sensor_type = SensorType::RADAR;
+          		meas_package.measurements = VectorXd(3);
           		float ro;
       	  		float theta;
       	  		float ro_dot;
           		iss >> ro;
           		iss >> theta;
           		iss >> ro_dot;
-          		meas_package.raw_measurements_ << ro,theta, ro_dot;
+          		meas_package.measurements << ro,theta, ro_dot;
           		iss >> timestamp;
-          		meas_package.timestamp_ = timestamp;
+          		meas_package.timestamp = timestamp;
           }
           float x_gt;
     	  float y_gt;
@@ -105,17 +107,17 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
           
-          //Call ProcessMeasurment(meas_package) for Kalman filter
+        //Call ProcessMeasurment(meas_package) for Kalman filter
     	  fusionEKF.ProcessMeasurement(meas_package);    	  
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
 
     	  VectorXd estimate(4);
 
-    	  double p_x = fusionEKF.ekf_.x_(0);
-    	  double p_y = fusionEKF.ekf_.x_(1);
-    	  double v1  = fusionEKF.ekf_.x_(2);
-    	  double v2 = fusionEKF.ekf_.x_(3);
+    	  double p_x = fusionEKF.ekf.x(0);
+    	  double p_y = fusionEKF.ekf.x(1);
+    	  double v1  = fusionEKF.ekf.x(2);
+    	  double v2 = fusionEKF.ekf.x(3);
 
     	  estimate(0) = p_x;
     	  estimate(1) = p_y;
