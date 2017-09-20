@@ -179,7 +179,7 @@ int main() {
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code,
                          char *message, size_t length) {
-    ws.close();
+    //ws.close(); // this causes segmentation fault (on Windows at least)
     std::cout << "Disconnected" << std::endl;
   });
 
