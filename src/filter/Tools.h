@@ -51,14 +51,17 @@ public:
   VectorXd PVToRadar(const VectorXd &pv);
 
   /**
-   * Helper function to align radius so it fall in the range of [0, 2PI)
+   * Helper function to align an angle so it fall in the range of [0, 2PI)
+   * This is important for computing the angular difference for radar sensor data
+   * Without the alignment, invalid state update might occur when crossing x or y axes
    */
-  float AlignRadius(const float radius);
+  float AlignAngle(const float radius);
 
   /**
-   * Helper function to align radius delta so it fall in the range of [PI, -PI)
+   * Helper function to align angular movement so it fall in the range of [PI, -PI).
+   * This will result in a minimal angle to rotate between two angles
    */
-  float AlignRadiusDelta(const float delta);
+  float AlignAngularMovement(const float delta);
 };
 
 #endif /* TOOLS_H_ */

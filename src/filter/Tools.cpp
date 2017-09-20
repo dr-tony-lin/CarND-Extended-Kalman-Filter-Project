@@ -72,7 +72,7 @@ VectorXd Tools::RadarToPV(const VectorXd &radar) {
 	return pv;
 }
 
-float Tools::AlignRadius(const float radius) {
+float Tools::AlignAngle(const float radius) {
   if (radius < 0) {
     return radius + PI_2;
   }
@@ -82,7 +82,7 @@ float Tools::AlignRadius(const float radius) {
   return radius;
 }
 
-float Tools::AlignRadiusDelta(const float delta) {
+float Tools::AlignAngularMovement(const float delta) {
   if (delta >= M_PI) {
     return delta - PI_2;
   }
@@ -101,7 +101,7 @@ VectorXd Tools::PVToRadar(const VectorXd &pv) {
       paw = M_PI + paw;
     }
     // Align paw to be within [0  2PI)
-    paw = AlignRadius(paw);
+    paw = AlignAngle(paw);
     float v = (pv(0)*pv(2) + pv(1)*pv(3)) / r;
 		radar << r, paw, v;
 	}
