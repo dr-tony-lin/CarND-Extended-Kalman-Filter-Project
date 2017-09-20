@@ -21,18 +21,11 @@ extern VectorXd RadarToPV(const VectorXd& data);
 extern VectorXd PVToRadar(const VectorXd& pv);
 
 /**
- * Helper function to align an angle so it fall in the range of [0, 2PI)
+ * Helper function to align an angle so it fall in the range of [PI, -PI)
  * This is important for computing the angular difference for radar sensor data
  * Without the alignment, invalid state update might occur when crossing x or y
  * axes
  */
 extern float AlignAngle(const float radius);
-
-/**
- * Helper function to align angular movement so it fall in the range of [PI,
- * -PI).
- * This will result in a minimal angle to rotate between two angles
- */
-extern float AlignAngularMovement(const float delta);
 }
 #endif /* TOOLS_H_ */

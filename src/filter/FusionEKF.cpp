@@ -125,7 +125,7 @@ void FusionEKF::ProcessMeasurement(
 
 void FusionEKF::UpdateEKF(const VectorXd &z) {
   VectorXd normalized_z = z;
-  // Align bearing angle to [0, 2PI), this is important for computing the difference.
+  // Align bearing angle to [PI, -PI), this is important for computing the difference.
   // Without the alignment, invalid state update may occur when crossing x or y axes
   normalized_z(1) = AlignAngle(z(1));
   MatrixXd H_t = H().transpose(); // transpose of H
@@ -133,7 +133,7 @@ void FusionEKF::UpdateEKF(const VectorXd &z) {
   VectorXd rad = PVToRadar(x());
   VectorXd y = normalized_z - rad;
   // align the difference in bearing angles to [PI, -PI), so we have a minimal possible rotation
-  y(1) = AlignAngularMovement(y(1));
+  y(1) = AlignAngle(y(1));
   MatrixXd S = R() + H() * P() * H_t;
   MatrixXd k = P() * H_t * S.inverse();
   // new state
