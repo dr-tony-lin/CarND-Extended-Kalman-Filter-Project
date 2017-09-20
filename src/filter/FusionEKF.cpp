@@ -1,12 +1,16 @@
 #include "FusionEKF.h"
-#include <iostream>
 #include "Eigen/Dense"
-#include "Tools.h"
+#include "utils.h"
+
+#ifdef VERBOSE_OUT
+#include <iostream>
+#endif
 
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
+using namespace utils;
 
 /*
  * Constructor.
@@ -49,26 +53,25 @@ void FusionEKF::ProcessMeasurement(
    ****************************************************************************/
   if (!is_initialized) {
     // first measurement
-    cout << "EKF: initializing ... " << endl;
-    ekf_.x(VectorXd(4));
+    x(VectorXd(4));
     previous_timestamp = measurement_pack.timestamp();
     if (measurement_pack.sensor_type() == SensorType::RADAR) {
       // Convert radar from polar to cartesian coordinates and initialize state.
-      ekf_.x(Tools::getTools().RadarToPV(measurement_pack.measurements()));
+      x(RadarToPV(measurement_pack.measurements()));
     } else if (measurement_pack.sensor_type() == SensorType::LASER) {
       // Initialize state from laser measurement
       VectorXd measurements = measurement_pack.measurements();
-      ekf_.x() << measurements[0], measurements[1], 0, 0;
+      x() << measurements[0], measurements[1], 0, 0;
     }
 
     // Initialize P, Q, H, F matrices
-    ekf_.P(MatrixXd(4, 4));
-    ekf_.P() << 1, 0, 0,    0,
+    P(MatrixXd(4, 4));
+    P() << 1, 0, 0,    0,
              0, 1, 0,    0,
              0, 0, 1000, 0,
              0, 0, 0,    1000;
-    ekf_.F(MatrixXd(4, 4));
-    ekf_.F() << 1, 0, 1, 0,
+    F(MatrixXd(4, 4));
+    F() << 1, 0, 1, 0,
              0, 1, 0, 1,
              0, 0, 1, 0,
              0, 0, 0, 1;
@@ -80,30 +83,27 @@ void FusionEKF::ProcessMeasurement(
   float dt = (measurement_pack.timestamp() - previous_timestamp) / 1000000.0;
   previous_timestamp = measurement_pack.timestamp();
 
-  cout << "Process: " << measurement_pack.timestamp() << ": dt = " << dt << ", " 
-       << (measurement_pack.sensor_type() == SensorType::RADAR? "R,  ": "L,  ")
-       << measurement_pack.measurements().transpose() << endl;
   /*****************************************************************************
    *  Prediction
    ****************************************************************************/
 
   if (dt > 0.0001) { // Else, skip prediction as this and the previous one happen at the same time
     // Update the state transition matrix according to dt
-    ekf_.F()(0, 2) = dt;
-    ekf_.F()(1, 3) = dt;
+    F()(0, 2) = dt;
+    F()(1, 3) = dt;
     // Update the Process covariance matrix Q
     float t2 = dt * dt;
     float t3 = t2 * dt / 2;
     float t4 = t2 * t2 / 4;
     float t3os_ax = t3/s_ax;
     float t3os_ay = t3/s_ay;
-    ekf_.Q(MatrixXd(4, 4));
-    ekf_.Q() << t4/s_ax, 0,               t3os_ax, 0,
+    Q(MatrixXd(4, 4));
+    Q() << t4/s_ax, 0,               t3os_ax, 0,
                0,               t4/s_ay, 0,               t3os_ay,
                t3os_ax, 0,               t2*s_ax,   0,
                0,               t3os_ay, 0,               t2*s_ay;
     // Perform prediction
-    ekf_.Predict();
+    Predict();
   }
 
   /*****************************************************************************
@@ -112,13 +112,72 @@ void FusionEKF::ProcessMeasurement(
 
   if (measurement_pack.sensor_type() == SensorType::RADAR) {
     // Radar updates, set radar's measurement trsnsition matrix and covariance matrix
-    ekf_.H(Hj = Tools::getTools().CalculateJacobian(ekf_.x()));
-    ekf_.R(R_radar);
-    ekf_.UpdateEKF(measurement_pack.measurements());
+    H(Hj = CalculateJacobian(x()));
+    R(R_radar);
+    UpdateEKF(measurement_pack.measurements());
   } else {
     // Laser updates, set laser's measurement trsnsition matrix and covariance matrix
-    ekf_.H(H_laser);
-    ekf_.R(R_laser);
-    ekf_.Update(measurement_pack.measurements());
+    H(H_laser);
+    R(R_laser);
+    Update(measurement_pack.measurements());
   }
+}
+
+void FusionEKF::UpdateEKF(const VectorXd &z) {
+  VectorXd normalized_z = z;
+  // Align bearing angle to [0, 2PI), this is important for computing the difference.
+  // Without the alignment, invalid state update may occur when crossing x or y axes
+  normalized_z(1) = AlignAngle(z(1));
+  MatrixXd H_t = H().transpose(); // transpose of H
+  // Convert state to radar measurement
+  VectorXd rad = PVToRadar(x());
+  VectorXd y = normalized_z - rad;
+  // align the difference in bearing angles to [PI, -PI), so we have a minimal possible rotation
+  y(1) = AlignAngularMovement(y(1));
+  MatrixXd S = R() + H() * P() * H_t;
+  MatrixXd k = P() * H_t * S.inverse();
+  // new state
+  x() += k * y;
+  // new state covariance matrix
+  P() = (I_ - k * H()) * P();
+#ifdef VERBOSE_OUT
+  // Write verbose information to cout
+  std::cout << "Update EKF: " << z.transpose() << ", aligned: " << normalized_z.transpose() << std::endl;
+  std::cout << "H = " << H() << std::endl;
+  std::cout << "R = " << R() << std::endl;
+  std::cout << "Rad = " << rad << std::endl;
+  std::cout << "y = " << y.transpose() << std::endl;
+  std::cout << "S = " << S << std::endl;
+  std::cout << "k = " << k << std::endl;
+#endif
+}
+
+MatrixXd FusionEKF::CalculateJacobian(const VectorXd &x_state) {
+  MatrixXd Hj(3, 4);
+  // recover state parameters
+  float px = x_state(0);
+  float py = x_state(1);
+  float vx = x_state(2);
+  float vy = x_state(3);
+
+  // pre-compute a set of terms to avoid repeated calculation
+  float l2 = px * px + py * py;
+  float l = sqrt(l2);
+  float vxpy_vypx_o_ll2 = (vx * py - vy * px) / (l * l2);
+  float pxol = px / l;
+  float pyol = py / l;
+
+  // check division by zero
+  if (fabs(l2) < EPSLION) {
+#ifdef VERBOSE_OUT
+    cout << "CalculateJacobian () - Error - Division by Zero" << endl;
+#endif
+    return Hj;
+  }
+
+  // compute the Jacobian matrix
+  Hj << pxol, pyol, 0, 0, 
+        -(py / l2), (px / l2), 0, 0,
+        py * vxpy_vypx_o_ll2, -px * vxpy_vypx_o_ll2, pxol, pyol;
+  return Hj;
 }

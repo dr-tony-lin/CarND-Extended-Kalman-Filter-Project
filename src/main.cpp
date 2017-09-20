@@ -3,7 +3,6 @@
 #include <iostream>
 #include "performance/RMSEEvaluator.h"
 #include "filter/FusionEKF.h"
-#include "filter/Tools.h"
 #include "json.hpp"
 #include "sensor/MeasurementPackage.h"
 #include "sensor/SensorType.h"
@@ -38,10 +37,7 @@ int main() {
   FusionEKF fusionEKF;
   RMSEEvaluator<Eigen::ArrayXd> evaluator;
 
-  // used to compute the RMSE later
-  Tools tools;
-
-  h.onMessage([&fusionEKF, &tools, &evaluator](
+  h.onMessage([&fusionEKF, &evaluator](
       uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
       uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -99,6 +95,11 @@ int main() {
           if (timestamp < previous_timestamp || timestamp - previous_timestamp > 1e8) {
             cout << "Restarting ..." << endl;
             fusionEKF.Reset();
+          } else {
+            cout << "Process: " << timestamp
+                 << ": dt = " << (timestamp - previous_timestamp) / 1000000
+                 << ", " << (type == SensorType::RADAR ? "R,  " : "L,  ")
+                 << measurements.transpose() << endl;
           }
 
           // Update the timestamp for restarting purpose
@@ -122,6 +123,9 @@ int main() {
 
           // Call ProcessMeasurment(meas_package) for Kalman filter
           fusionEKF.ProcessMeasurement(meas_package);
+
+          std::cout << "x = " << fusionEKF.x().transpose() << std::endl;
+          std::cout << "P = " << fusionEKF.P() << std::endl;
 
           // Push the current Kalman filter's estimate to the RMSE evaluator
           VectorXd estimate = fusionEKF.x();

@@ -1,15 +1,25 @@
 #ifndef FILTER_FUSIONEKF_H_
 #define FILTER_FUSIONEKF_H_
 
-#include "../sensor/MeasurementPackage.h"
-#include "../sensor/SensorType.h"
 #include "Eigen/Dense"
 #include <vector>
 #include <string>
 #include <fstream>
 #include "KalmanFilter.h"
 
-class FusionEKF {
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
+using std::vector;
+
+class FusionEKF: public KalmanFilter {
+protected:
+  /**
+   * Updates the state by using Extended Kalman Filter equations
+   * @param z The measurement at k+1
+   */
+   void UpdateEKF(const VectorXd &z);
+   static MatrixXd CalculateJacobian(const VectorXd &x_state);
+   
 public:
   /**
   * Constructor.
@@ -21,37 +31,16 @@ public:
   */
   virtual ~FusionEKF();
 
-  /**
-   * Reset the filter
-   */
   void Reset() {
     is_initialized = false;
   }
-
-  /**
-   * Get the state
-   */
-  Eigen::VectorXd& x() {
-    return ekf_.x();
-  };
-
-  /**
-   * Get the state covariance matrix
-   */
-  Eigen::MatrixXd& P() {
-    return ekf_.P();
-  };
-
+  
   /**
   * Run the whole flow of the Kalman Filter from here.
   */
   void ProcessMeasurement(const MeasurementPackage<SensorType> &measurement_pack);
 
-
 private:
-  // Kalman Filter update and prediction math lives in here.
-  KalmanFilter ekf_;
-
   // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized;
 
@@ -59,16 +48,16 @@ private:
   long long previous_timestamp;
 
   // measurement covariance matrix for laser
-  Eigen::MatrixXd R_laser;
+  MatrixXd R_laser;
 
   // measurement covariance matrix for radar
-  Eigen::MatrixXd R_radar;
+  MatrixXd R_radar;
 
   // measurement matrix for laser
-  Eigen::MatrixXd H_laser;
+  MatrixXd H_laser;
 
   // measurement matrix for radar
-  Eigen::MatrixXd Hj;
+  MatrixXd Hj;
 
   // acceleration noise x
   float s_ax;
