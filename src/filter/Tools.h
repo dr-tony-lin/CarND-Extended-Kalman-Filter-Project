@@ -1,5 +1,5 @@
-#ifndef TOOLS_H_
-#define TOOLS_H_
+#ifndef FILTER_TOOLS_H_
+#define FILTER_TOOLS_H_
 #include <vector>
 #include "Eigen/Dense"
 
