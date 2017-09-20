@@ -1,11 +1,13 @@
 #include <math.h>
 #include <uWS/uWS.h>
 #include <iostream>
+#include "performance/RMSEEvaluator.h"
 #include "filter/FusionEKF.h"
 #include "filter/Tools.h"
 #include "json.hpp"
 #include "sensor/MeasurementPackage.h"
 #include "sensor/SensorType.h"
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -34,13 +36,12 @@ int main() {
 
   // Create a Kalman Filter instance
   FusionEKF fusionEKF;
+  RMSEEvaluator<Eigen::ArrayXd> evaluator;
 
   // used to compute the RMSE later
   Tools tools;
-  vector<VectorXd> estimations;
-  vector<VectorXd> ground_truth;
 
-  h.onMessage([&fusionEKF, &tools, &estimations, &ground_truth](
+  h.onMessage([&fusionEKF, &tools, &evaluator](
       uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
       uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -92,6 +93,18 @@ int main() {
             timestamp = timestamp;
           }
 
+          // We want to be able to test different data set without restarting the program
+          // However, we will not reset the RMSE data so we could have more samples for a
+          // better RMSE
+          if (timestamp < previous_timestamp || timestamp - previous_timestamp > 1e8) {
+            cout << "Restarting ..." << endl;
+            fusionEKF.Reset();
+          }
+
+          // Update the timestamp for restarting purpose
+          previous_timestamp = timestamp;
+
+          // Create the measurement package to pass to Kalman filter
           MeasurementPackage<SensorType> meas_package(timestamp, type, measurements);
           float x_gt;
           float y_gt;
@@ -106,21 +119,11 @@ int main() {
           gt_values(1) = y_gt;
           gt_values(2) = vx_gt;
           gt_values(3) = vy_gt;
-          ground_truth.push_back(gt_values);
 
-          // We want to be able to test different data set without restarting the program, the simple logic that we
-          if (meas_package.timestamp() < previous_timestamp || meas_package.timestamp() - previous_timestamp > 1e8) {
-            cout << "Restarting ..." << endl;
-            fusionEKF.Reset();
-          }
-          
           // Call ProcessMeasurment(meas_package) for Kalman filter
           fusionEKF.ProcessMeasurement(meas_package);
 
-          // Push the current estimated x,y positon from the Kalman filter's
-          // state vector
-
-          previous_timestamp = meas_package.timestamp();
+          // Push the current Kalman filter's estimate to the RMSE evaluator
           VectorXd estimate = fusionEKF.x();
 
           double p_x = estimate(0);
@@ -128,10 +131,11 @@ int main() {
           double v1 = estimate(2);
           double v2 = estimate(3);
 
-          estimations.push_back(estimate);
+          evaluator.Add(estimate.array(), gt_values.array());
 
-          VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
+          Eigen::ArrayXd RMSE = evaluator.Evaluate();
 
+          // Send RMSE back to the simulator
           json msgJson;
           msgJson["estimate_x"] = p_x;
           msgJson["estimate_y"] = p_y;

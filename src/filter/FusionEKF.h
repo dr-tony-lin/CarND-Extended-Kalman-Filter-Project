@@ -1,5 +1,5 @@
-#ifndef FusionEKF_H_
-#define FusionEKF_H_
+#ifndef FILTER_FUSIONEKF_H_
+#define FILTER_FUSIONEKF_H_
 
 #include "../sensor/MeasurementPackage.h"
 #include "../sensor/SensorType.h"

@@ -1,5 +1,5 @@
-#ifndef KALMAN_FILTER_H_
-#define KALMAN_FILTER_H_
+#ifndef FILTER_KALMAN_FILTER_H_
+#define FILTER_KALMAN_FILTER_H_
 #include "Eigen/Dense"
 
 class KalmanFilter {
@@ -72,16 +72,12 @@ class KalmanFilter {
    * Set the state
    * @param value the value to set
    */
-  void x(const Eigen::VectorXd value) {
-    x_ = value;
-  };
+  void x(const Eigen::VectorXd value) { x_ = value; };
 
   /**
    * Get the state
    */
-   Eigen::VectorXd& x() {
-    return x_;
-  };
+  Eigen::VectorXd &x() { return x_; };
 
   /**
    * Set the state covariance matrix
@@ -92,72 +88,54 @@ class KalmanFilter {
     // Also set the identity matrix for the Update operations
     I_ = Eigen::MatrixXd::Identity(P_.rows(), P_.cols());
   };
-  
+
   /**
    * Get the state covariance matrix
    */
-  Eigen::MatrixXd& P() {
-    return P_;
-  };
+  Eigen::MatrixXd &P() { return P_; };
 
   /**
    * Set the state transition matrix
    * @param value the value to set
    */
-  void F(const Eigen::MatrixXd value) {
-    F_ = value;
-  };
-  
+  void F(const Eigen::MatrixXd value) { F_ = value; };
+
   /**
    * Get the state transition matrix
    */
-   Eigen::MatrixXd& F() {
-    return F_;
-  };
+  Eigen::MatrixXd &F() { return F_; };
 
   /**
    * Set the process covariance matrix
    * @param value the value to set
    */
-  void Q(const Eigen::MatrixXd value) {
-    Q_ = value;
-  };
-  
+  void Q(const Eigen::MatrixXd value) { Q_ = value; };
+
   /**
    * Get process covariance matrix
    */
-   Eigen::MatrixXd& Q() {
-    return Q_;
-  };
+  Eigen::MatrixXd &Q() { return Q_; };
 
   /**
    * Set the measurement matrix
    * @param value the value to set
    */
-  void H(const Eigen::MatrixXd value) {
-    H_ = value;
-  };
-  
+  void H(const Eigen::MatrixXd value) { H_ = value; };
+
   /**
    * Get the measurement matrix
    */
-   Eigen::MatrixXd& H() {
-    return H_;
-  };
+  Eigen::MatrixXd &H() { return H_; };
 
   /**
    * Set the measurement covariance matrix
    * @param value the value to set
    */
-  void R(const Eigen::MatrixXd value) {
-    R_ = value;
-  };
-  
+  void R(const Eigen::MatrixXd value) { R_ = value; };
+
   /**
    * Get the measurement covariance matrix
    */
-   Eigen::MatrixXd& R() {
-    return R_;
-  };
+  Eigen::MatrixXd &R() { return R_; };
 };
 #endif /* KALMAN_FILTER_H_ */
