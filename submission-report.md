@@ -141,12 +141,12 @@ Despite the assumptions made for EKF, will changing condifence on prediction imp
 
 |            |   8      |   9      |   10     |   12     |   20     |   30     |   40     |   60     |
 |:----------:|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|---------:|---------:|
-| X    		 |   0.0869 |   0.0859 |   0.085  |   0.0839 |   0.0822 |   0.0821 |   0.0824 |   0.0832 | 
-| Y          |   0.0930 |   0.0911 |   0.0897 |   0.0878 |   0.0854 |   0.0859 |   0.0871 |   0.0896 | 
-| Vx    	 |   0.4407 |   0.4367 |   0.4337 |   0.4298 |   0.4265 |   0.4310 |   0.4337 |   0.4519 |
-| Vy         |   0.4756 |   0.4673 |   0.4605 |   0.4502 |   0.4316 |   0.4283 |   0.4324 |   0.4481 |
+| X    		 |   0.0869 |   0.0859 |   0.085  |   0.0839 |   0.0822 (-3.93%) |   0.0821 |   0.0824 |   0.0832 | 
+| Y          |   0.0930 |   0.0911 |   0.0897 |   0.0878 |   0.0854 (-6.25%) |   0.0859 |   0.0871 |   0.0896 | 
+| Vx    	 |   0.4407 |   0.4367 |   0.4337 |   0.4298 |   0.4265 (-2.33%) |   0.4310 |   0.4337 |   0.4519 |
+| Vy         |   0.4756 |   0.4673 |   0.4605 |   0.4502 |   0.4316 (-7.64%) |   0.4283 |   0.4324 |   0.4481 |
 
-Acceleration noise between 20 and 30 yields the best RMSE perfoamance. [This video](video2.mp4) shows the simulation with the acceleration noise of 20.
+Acceleration noise between 20 and 30 yields the best RMSE perfoamance (RMSE improvement for noise 20 with respect to noise 9 is shown in the table). [This video](video2.mp4) shows the simulation with noise 20.
 
 Regarding to whether using lidar alone or radar alone changes the performance, I did not observe any difference.
 The following videos demonstrate this:
