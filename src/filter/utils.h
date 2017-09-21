@@ -6,8 +6,20 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+//
+// @file
+// @brief This file contains utility functions for EKF implementation
+//
+
 namespace utils {
+/**
+ * The smallest number to be considered as 0
+ */
 const float EPSLION = 0.00000001;
+
+/**
+ * 2&pi;
+ */
 const float PI_2 = 2 * M_PI;
 
 /**

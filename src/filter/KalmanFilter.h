@@ -32,9 +32,12 @@ class KalmanFilter {
   virtual void Reset() {}
 
   /**
-    * Run the whole flow of the Kalman Filter from here.
+    * Run the Kalman Filter estimation on the given sensor
+    * measurement.
+    * @param measurement_pack the MeasurementPackage
+    * @return true if the estimate was made, false if the initialization was carried.
     */
-  virtual void ProcessMeasurement(
+  virtual bool ProcessMeasurement(
       const MeasurementPackage<SensorType> &measurement_pack) = 0;
 
   /**
@@ -89,7 +92,11 @@ class KalmanFilter {
   Eigen::MatrixXd &R() { return R_; };
 
  protected:
-  // Identity matrix same size as the state covariance matrix
+  /**
+   * Precomputed identity matrix same size as the state covariance matrix.
+   * This is computed when setting the state covariance matrix P in
+        P(const Eigen::MatrixXd value)
+   */
   Eigen::MatrixXd I_;
 
   /**

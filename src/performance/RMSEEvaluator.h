@@ -3,16 +3,23 @@
 #include <functional>
 
 /**
- * RMSEEvaluator class implements RMSE (Root mean square error) for a given set
- * of estimates and ground truth data of a given type T. The type T is expected
- * to provide -, * and sqrt operations. Otherwise, two operators should be
- * passed to the constructor: 
-
-       RMSEEvaluator(std::function<T(T&, const T&, const T&)> const& add_diff, 
-       std::function<T(const T&, long long)> const& mean)
+ * This class implements RMSE (Root mean square error) aimed to minimize
+ * memory consumption in order to handle a large number of estimates.
+ *
+ * Estimationa and their ground truths are submitted through
+ * Add(T estimate, T ground_truth). Type T is expected to provide the
+ * following operators:
  * 
- * The implementation aimed to minimize memory consumption in order to handle a
- * large number of estimates.
+ * - - : element-wisesubstraction
+ * - * : element-wisemultiplication
+ * - sqrt : element-wise squart root operations.
+ *
+ * On the other hand, if T does not provide the above operators, the following
+ * operator functions should be supplied to the constructor: 
+ *
+ * RMSEEvaluator(std::function<T(T&, const T&, const T&)> const& add_diff,
+ * std::function<T(const T&, long long)> const& mean)
+ * 
  */
 template <typename T>
 class RMSEEvaluator {
@@ -38,12 +45,13 @@ class RMSEEvaluator {
    * Constructor
    * @param add_diff the operator to add the square difference difference, it
    * takes 3 arguments:
-   *        the result where the square difference is to be added into, the
-   * estimate, and the ground truth.
-   * @param mean_ the operator to compute the mean from the sum of the sequre
-   * differences,
-   *        it takes 2 arguments: the sum of the square difference, and the
-   * total data count.
+   * -    the result where the square difference is to be added into,
+   * -    the estimate
+   * -    the ground truth.
+   * @param mean the operator to compute the mean from the sum of the sequre
+   * differences, it takes 2 arguments: 
+   * -    the sum of the square difference
+   * -    the total data count.
    */
   RMSEEvaluator(std::function<T(T&, const T&, const T&)> const& add_diff,
                 std::function<T(const T&, long long)> const& mean) {
@@ -57,12 +65,12 @@ class RMSEEvaluator {
   ~RMSEEvaluator() {}
 
   /**
-   * Reset the evaluator so it can be restarted
+   * Reset the evaluator so it can evaluate a new set of estimates
    */
   void Reset() { count_ = 0; }
 
   /**
-   * Add an estimate and ground truth
+   * Add an estimate and ground truth for evaluation
    * @param estimate the estimate
    * @param ground_truth the ground truth
    */

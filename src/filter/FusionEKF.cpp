@@ -46,7 +46,7 @@ FusionEKF::FusionEKF() {
 */
 FusionEKF::~FusionEKF() {}
 
-void FusionEKF::ProcessMeasurement(
+bool FusionEKF::ProcessMeasurement(
     const MeasurementPackage<SensorType> &measurement_pack) {
   /*****************************************************************************
    *  Initialization
@@ -77,7 +77,7 @@ void FusionEKF::ProcessMeasurement(
              0, 0, 0, 1;
     // done initializing, no need to predict or update
     is_initialized = true;
-    return;
+    return false;
   }
 
   float dt = (measurement_pack.timestamp() - previous_timestamp) / 1000000.0;
@@ -87,7 +87,7 @@ void FusionEKF::ProcessMeasurement(
    *  Prediction
    ****************************************************************************/
 
-  if (dt > 0.0001) { // Else, skip prediction as this and the previous one happen at the same time
+  if (dt > MINIMAL_TIME_THRESHOLD) { // Else, skip prediction as this and the previous one happen at the same time
     // Update the state transition matrix according to dt
     F()(0, 2) = dt;
     F()(1, 3) = dt;
@@ -121,6 +121,8 @@ void FusionEKF::ProcessMeasurement(
     R(R_laser);
     Update(measurement_pack.measurements());
   }
+
+  return true;
 }
 
 void FusionEKF::UpdateEKF(const VectorXd &z) {

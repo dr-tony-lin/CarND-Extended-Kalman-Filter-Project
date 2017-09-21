@@ -3,6 +3,10 @@
 
 #include "Eigen/Dense"
 
+/**
+ * This class represents a sensor measurement package containing
+ * the timestamp, the sensor type, and the measurements
+ */
 template<typename T> class MeasurementPackage {
 private:
   long long timestamp_;
@@ -10,6 +14,12 @@ private:
   Eigen::VectorXd measurements_;
 
 public:
+  /**
+   * Construct a new measurement package
+   * @param timestamp the timestamp when the measurement was obtained
+   * @param sensor_type type of the sensor
+   * @param measurements the measurements
+   */
   MeasurementPackage(long long timestamp, T sensor_type, Eigen::VectorXd measurements) {
     timestamp_ = timestamp;
     sensor_type_ = sensor_type;
