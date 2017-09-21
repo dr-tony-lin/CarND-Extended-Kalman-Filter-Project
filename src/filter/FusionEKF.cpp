@@ -37,8 +37,8 @@ FusionEKF::FusionEKF() {
   H_laser << 1, 0, 0, 0,
              0, 1, 0, 0;
   
-  s_ax = 9; // acceleration noise x
-  s_ay = 9; // acceleration noise y
+  s_ax = 20; // acceleration noise x
+  s_ay = 20; // acceleration noise y
 }
 
 /**
@@ -93,15 +93,15 @@ bool FusionEKF::ProcessMeasurement(
     F()(1, 3) = dt;
     // Update the Process covariance matrix Q
     float t2 = dt * dt;
-    float t3 = t2 * dt / 2;
-    float t4 = t2 * t2 / 4;
-    float t3os_ax = t3/s_ax;
-    float t3os_ay = t3/s_ay;
+    float t3 = t2 * dt/2;
+    float t4 = t2 * t2/4;
+    float t3os_ax = t3*s_ax;
+    float t3os_ay = t3*s_ay;
     Q(MatrixXd(4, 4));
-    Q() << t4/s_ax, 0,               t3os_ax, 0,
-               0,               t4/s_ay, 0,               t3os_ay,
-               t3os_ax, 0,               t2*s_ax,   0,
-               0,               t3os_ay, 0,               t2*s_ay;
+    Q() << t4*s_ax,       0, t3os_ax,       0,
+                 0, t4*s_ay,       0, t3os_ay,
+           t3os_ax,       0, t2*s_ax,       0,
+                 0, t3os_ay,       0, t2*s_ay;
     // Perform prediction
     Predict();
   }

@@ -51,6 +51,7 @@ class FusionEKF : public KalmanFilter {
     * Run the Kalman Filter estimation on the given sensor
     * measurement.
     * @param measurement_pack the MeasurementPackage
+    * @return true if the estimate was made, false if the initialization was performed.
     */
   bool ProcessMeasurement(
       const MeasurementPackage<SensorType> &measurement_pack);

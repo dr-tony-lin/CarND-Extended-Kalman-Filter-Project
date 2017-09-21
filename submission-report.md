@@ -2,6 +2,8 @@
 
 [video1]: ./video1.mp4
 [video2]: ./video2.mp4
+[laser]: ./laser.mp4
+[radar]: ./radar.mp4
 
 ## Content of the Submission and Usage
 This submission includes the following c++ files:
@@ -125,14 +127,31 @@ The RMSE performance of the implementation is averaged as follows after running 
 
 |            |   RMSE   |
 |:----------:|:--------:|
-| X    		 |   0.0876 |
-| Y          |   0.0913 |
-| Vx    	 |   0.4357 |
-| Vy         |   0.4678 |
+| X    		 |   0.0859 |
+| Y          |   0.0911 |
+| Vx    	 |   0.4367 |
+| Vy         |   0.4673 |
 
-Refer to [video1.mp4](video1.mp4).
+Refer to [this video](video1.mp4).
 
-Subsequent tests by repeating both dataset multiple times is shown in [video2.mp4](video2.mp4)
+### Discussion and Extra Experiments
+The Kalman filter produces estimates effectively by dealing with uncertainity due to sensor noise and random external factors using a weighted average between current state estimation and the new measurement. The weight are derived from the covariance matrices. Intuitively, when the state covariance is smaller than the measurement covariance, the predicted state is trusted more, and will have a bigger weight, and when the state covariance is larger than the measurement covariance, the predicted is trusted less, and will have a smaller weight.
 
-### Discussion and further works
+Despite the assumptions made for EKF, will changing condifence on prediction improves the RMSE performance? To answer this question, I run through a set of experiments that use different level of acceleration noise.  
+
+|            |   8      |   9      |   10     |   12     |   20     |   30     |   40     |   60     |
+|:----------:|:--------:|:--------:|:--------:|:--------:|:--------:|:--------:|---------:|---------:|
+| X    		 |   0.0869 |   0.0859 |   0.085  |   0.0839 |   0.0822 |   0.0821 |   0.0824 |   0.0832 | 
+| Y          |   0.0930 |   0.0911 |   0.0897 |   0.0878 |   0.0854 |   0.0859 |   0.0871 |   0.0896 | 
+| Vx    	 |   0.4407 |   0.4367 |   0.4337 |   0.4298 |   0.4265 |   0.4310 |   0.4337 |   0.4519 |
+| Vy         |   0.4756 |   0.4673 |   0.4605 |   0.4502 |   0.4316 |   0.4283 |   0.4324 |   0.4481 |
+
+Acceleration noise between 20 and 30 yields the best RMSE perfoamance. [This video](video2.mp4) shows the simulation with the acceleration noise of 20.
+
+Regarding to whether using lidar alone or radar alone changes the performance, I did not observe any difference.
+The following videos demonstrate this:
+
+[for Laser alone](laser.mp4)
+
+[for Radar alone](radar.mp4)
 

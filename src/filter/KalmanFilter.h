@@ -35,7 +35,7 @@ class KalmanFilter {
     * Run the Kalman Filter estimation on the given sensor
     * measurement.
     * @param measurement_pack the MeasurementPackage
-    * @return true if the estimate was made, false if the initialization was carried.
+    * @return true if the estimate was made, false if the initialization was performed.
     */
   virtual bool ProcessMeasurement(
       const MeasurementPackage<SensorType> &measurement_pack) = 0;

@@ -97,7 +97,7 @@ int main() {
             fusionEKF.Reset();
           } else {
             cout << "Process: " << timestamp
-                 << ": dt = " << (timestamp - previous_timestamp) / 1000000
+                 << ": dt = " << (timestamp - previous_timestamp) / 1000000.0
                  << ", " << (type == SensorType::RADAR ? "R,  " : "L,  ")
                  << measurements.transpose() << endl;
           }

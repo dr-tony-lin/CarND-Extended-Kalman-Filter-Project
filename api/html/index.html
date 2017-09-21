@@ -163,17 +163,34 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr>
 <th align="center"></th><th align="center">RMSE  </th></tr>
 <tr>
-<td align="center">X </td><td align="center">0.0876 </td></tr>
+<td align="center">X </td><td align="center">0.0859 </td></tr>
 <tr>
-<td align="center">Y </td><td align="center">0.0913 </td></tr>
+<td align="center">Y </td><td align="center">0.0911 </td></tr>
 <tr>
-<td align="center">Vx </td><td align="center">0.4357 </td></tr>
+<td align="center">Vx </td><td align="center">0.4367 </td></tr>
 <tr>
-<td align="center">Vy </td><td align="center">0.4678 </td></tr>
+<td align="center">Vy </td><td align="center">0.4673 </td></tr>
 </table>
-<p>Refer to <a href="video1.mp4">video1.mp4</a>.</p>
-<p>Subsequent tests by repeating both dataset multiple times is shown in <a href="video2.mp4">video2.mp4</a></p>
-<h3>Discussion and further works</h3>
+<p>Refer to <a href="video1.mp4">this video</a>.</p>
+<h3>Discussion and Extra Experiments</h3>
+<p>The Kalman filter produces estimates effectively by dealing with uncertainity due to sensor noise and random external factors using a weighted average between current state estimation and the new measurement. The weight are derived from the covariance matrices. Intuitively, when the state covariance is smaller than the measurement covariance, the predicted state is trusted more, and will have a bigger weight, and when the state covariance is larger than the measurement covariance, the predicted is trusted less, and will have a smaller weight.</p>
+<p>Despite the assumptions made for EKF, will changing condifence on prediction improves the RMSE performance? To answer this question, I run through a set of experiments that use different level of acceleration noise.</p>
+<table class="doxtable">
+<tr>
+<th align="center"></th><th align="center">8 </th><th align="center">9 </th><th align="center">10 </th><th align="center">12 </th><th align="center">20 </th><th align="center">30 </th><th align="right">40 </th><th align="right">60  </th></tr>
+<tr>
+<td align="center">X </td><td align="center">0.0869 </td><td align="center">0.0859 </td><td align="center">0.085 </td><td align="center">0.0839 </td><td align="center">0.0822 </td><td align="center">0.0821 </td><td align="right">0.0824 </td><td align="right">0.0832 </td></tr>
+<tr>
+<td align="center">Y </td><td align="center">0.0930 </td><td align="center">0.0911 </td><td align="center">0.0897 </td><td align="center">0.0878 </td><td align="center">0.0854 </td><td align="center">0.0859 </td><td align="right">0.0871 </td><td align="right">0.0896 </td></tr>
+<tr>
+<td align="center">Vx </td><td align="center">0.4407 </td><td align="center">0.4367 </td><td align="center">0.4337 </td><td align="center">0.4298 </td><td align="center">0.4265 </td><td align="center">0.4310 </td><td align="right">0.4337 </td><td align="right">0.4519 </td></tr>
+<tr>
+<td align="center">Vy </td><td align="center">0.4756 </td><td align="center">0.4673 </td><td align="center">0.4605 </td><td align="center">0.4502 </td><td align="center">0.4316 </td><td align="center">0.4283 </td><td align="right">0.4324 </td><td align="right">0.4481 </td></tr>
+</table>
+<p>Acceleration noise between 20 and 30 yields the best RMSE perfoamance. <a href="video2.mp4">This video</a> shows the simulation with the acceleration noise of 20.</p>
+<p>Regarding to whether using lidar alone or radar alone changes the performance, I did not observe any difference. The following videos demonstrate this:</p>
+<p><a href="laser.mp4">for Laser alone</a></p>
+<p><a href="radar.mp4">for Radar alone</a> </p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
